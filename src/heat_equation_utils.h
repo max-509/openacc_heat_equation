@@ -20,7 +20,7 @@ long double maxld(long double v1, long double v2) {
     float: fabsf, \
     default: fabs)(x)
 
-#define max(x, y) _Generic((x) + (y), \
+#define fmax(x, y) _Generic((x) + (y), \
   long double: maxld, \
   float: maxf, \
   default: maxd)(x, y)

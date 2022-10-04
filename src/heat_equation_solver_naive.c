@@ -36,7 +36,7 @@ solve_heat_equation(FLOAT_TYPE *init_grid, size_t grid_size, size_t max_iter, FL
       err = (FLOAT_TYPE)0.0;
 
       #pragma acc data present(next_grid[0:(grid_size*grid_size)], curr_grid[0:(grid_size*grid_size)])
-      #pragma acc parallel
+      #pragma acc kernels
       {
         #pragma acc loop independent collapse(2) reduction(max:err)
         for (size_t i = 1; i < grid_size - 1; ++i) {
@@ -46,18 +46,15 @@ solve_heat_equation(FLOAT_TYPE *init_grid, size_t grid_size, size_t max_iter, FL
                                                       curr_grid[grid_idx + grid_size] + 
                                                       curr_grid[grid_idx - 1] + 
                                                       curr_grid[grid_idx + 1]);
-            err = max(err, fabs(next_grid[grid_idx] - curr_grid[grid_idx]));
+            err = fmax(err, fabs(next_grid[grid_idx] - curr_grid[grid_idx]));
           }
         }
 
       }
       
-      #pragma acc data present(next_grid[0:(grid_size*grid_size)], curr_grid[0:(grid_size*grid_size)])
-      { 
-        FLOAT_TYPE *tmp_ptr = curr_grid;
-        curr_grid = next_grid;
-        next_grid = tmp_ptr;
-      }
+      FLOAT_TYPE *tmp_ptr = curr_grid;
+      curr_grid = next_grid;
+      next_grid = tmp_ptr;
     }
 
     #pragma acc data present(curr_grid[0:(grid_size*grid_size)])

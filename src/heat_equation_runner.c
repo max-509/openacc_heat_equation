@@ -6,23 +6,23 @@
 #include "heat_equation_common.h"
 #include "heat_equation_solver.h"
 
-FLOAT_TYPE
+static FLOAT_TYPE
 parse_etol(const char *etol_str);
 
-size_t
+static size_t
 parse_grid_size(const char *grid_size_str);
 
-size_t
+static size_t
 parse_max_iter(const char *max_iter_str);
 
-void
+static void
 init_grid(FLOAT_TYPE left_upper_border, FLOAT_TYPE right_upper_border, 
           FLOAT_TYPE left_lower_border, FLOAT_TYPE right_lower_border,
           FLOAT_TYPE *grid, size_t grid_size);
 
-void
+static void
 linear_interpolate_col(FLOAT_TYPE y0, FLOAT_TYPE y1, FLOAT_TYPE *grid, size_t col_idx, size_t grid_size);
-void
+static void
 linear_interpolate_row(FLOAT_TYPE y0, FLOAT_TYPE y1, FLOAT_TYPE *grid, size_t row_idx, size_t grid_size);
 
 int main(int argc, const char *argv[]) {
@@ -60,9 +60,10 @@ int main(int argc, const char *argv[]) {
   }
 
   printf("NUMBER OF ITER: %lu\n", last_iter);
+  printf("ELAPSED TIME: %.4f\n", elapsed_time);
 }
 
-FLOAT_TYPE
+static FLOAT_TYPE
 parse_etol(const char *etol_str) {
   char *etol_endptr = NULL;
   FLOAT_TYPE etol = strtod(etol_str, &etol_endptr);
@@ -74,7 +75,7 @@ parse_etol(const char *etol_str) {
   return etol;
 }
 
-size_t
+static size_t
 parse_grid_size(const char *grid_size_str) {
   char *grid_size_endptr = NULL;
   size_t grid_size = strtoull(grid_size_str, &grid_size_endptr, 10);
@@ -86,7 +87,7 @@ parse_grid_size(const char *grid_size_str) {
   return grid_size;
 }
 
-size_t
+static size_t
 parse_max_iter(const char *max_iter_str) {
   char *max_iter_endptr = NULL;
   size_t max_iter = strtoull(max_iter_str, &max_iter_endptr, 10);
@@ -98,7 +99,7 @@ parse_max_iter(const char *max_iter_str) {
   return max_iter;
 }
 
-void
+static void
 init_grid(FLOAT_TYPE left_upper_border, FLOAT_TYPE right_upper_border, 
           FLOAT_TYPE left_lower_border, FLOAT_TYPE right_lower_border,
           FLOAT_TYPE *grid, size_t grid_size) {
@@ -113,7 +114,7 @@ init_grid(FLOAT_TYPE left_upper_border, FLOAT_TYPE right_upper_border,
   linear_interpolate_row(left_lower_border, right_lower_border, grid, grid_size - 1, grid_size);
 }
 
-void
+static void
 linear_interpolate_col(FLOAT_TYPE y0, FLOAT_TYPE y1, FLOAT_TYPE *grid, size_t col_idx, size_t grid_size) {
   FLOAT_TYPE step = (y1 - y0) / (FLOAT_TYPE)(grid_size - 1);
   for (size_t row_idx = 0; row_idx < grid_size; ++row_idx) {
@@ -121,7 +122,7 @@ linear_interpolate_col(FLOAT_TYPE y0, FLOAT_TYPE y1, FLOAT_TYPE *grid, size_t co
   }
 }
 
-void
+static void
 linear_interpolate_row(FLOAT_TYPE y0, FLOAT_TYPE y1, FLOAT_TYPE *grid, size_t row_idx, size_t grid_size) {
   FLOAT_TYPE step = (y1 - y0) / (FLOAT_TYPE)(grid_size - 1);
   for (size_t col_idx = 0; col_idx < grid_size; ++col_idx) {
