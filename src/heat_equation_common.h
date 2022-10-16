@@ -8,5 +8,4 @@
 #define FLOAT_TYPE double
 #endif //  FLOAT_TYPE
 
-
 #endif //  HEAT_EQUATION_COMMON_H

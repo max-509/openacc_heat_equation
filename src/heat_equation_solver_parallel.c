@@ -19,9 +19,9 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
     size_t curr_iter;
 
 #pragma acc data present(init_grid [0:grid_sqr], next_grid [0:grid_sqr], curr_grid [0:grid_sqr])
-#pragma acc kernels
+#pragma acc parallel
     {
-#pragma acc loop collapse(2)
+#pragma acc loop independent collapse(2)
       for (size_t i = 0; i < grid_size; ++i)
       {
         for (size_t j = 0; j < grid_size; ++j)
@@ -40,9 +40,8 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
 #pragma acc data present(next_grid [0:grid_sqr], curr_grid [0:grid_sqr])
 #pragma acc kernels
       {
-// acc update cell for err variable
-// update variable every N iterations
-#pragma acc loop collapse(2)
+#pragma acc loop independent collapse(2) reduction(max \
+                                                   : err)
         for (size_t i = 1; i < grid_size - 1; ++i)
         {
           for (size_t j = 1; j < grid_size - 1; ++j)
@@ -57,16 +56,15 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
         }
       }
 
-      // One iteration compute two arrays
       FLOAT_TYPE *tmp_ptr = curr_grid;
       curr_grid = next_grid;
       next_grid = tmp_ptr;
     }
 
 #pragma acc data present(init_grid [0:grid_sqr], curr_grid [0:grid_sqr])
-#pragma acc kernels
+#pragma acc parallel
     {
-#pragma acc loop collapse(2)
+#pragma acc loop independent collapse(2)
       for (size_t i = 0; i < grid_size; ++i)
       {
         for (size_t j = 0; j < grid_size; ++j)
@@ -89,7 +87,7 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
 }
 
 const char *get_solver_version() {
-  return "Version 1";
+  return "Version 2";
 }
 
 int get_iters_without_err() {
