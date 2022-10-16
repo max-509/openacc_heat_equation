@@ -7,10 +7,10 @@
 #define N_ERR_COMPUTING_IN_DEVICE 1
 #endif // N_ERR_COMPUTING_IN_DEVICE
 
-int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size, const size_t max_iter, const FLOAT_TYPE etol, size_t *last_iter)
+int solve_heat_equation(FLOAT_TYPE *restrict init_grid, const size_t grid_size, const size_t max_iter, const FLOAT_TYPE etol, size_t *last_iter)
 {
   const size_t grid_sqr = grid_size * grid_size;
-  FLOAT_TYPE * restrict buff_grid = (FLOAT_TYPE *)malloc(sizeof(FLOAT_TYPE) * (grid_sqr * 2));
+  FLOAT_TYPE *restrict buff_grid = (FLOAT_TYPE *)malloc(sizeof(FLOAT_TYPE) * (grid_sqr * 2));
   if (NULL == buff_grid)
   {
     return 1;
@@ -44,7 +44,7 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
       for (n_err_iter = 0; n_err_iter + 2 < N_ERR_COMPUTING_IN_DEVICE; n_err_iter += 2)
       {
 #pragma acc data present(buff_grid [0:grid_sqr * 2])
-#pragma acc kernels
+#pragma acc kernels async
         {
 #pragma acc loop independent collapse(2)
           for (size_t i = 1; i < grid_size - 1; ++i)
@@ -76,6 +76,7 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
       }
 
       err = (FLOAT_TYPE)0.0;
+#pragma acc wait
 #pragma acc data present(buff_grid [0:grid_sqr * 2]) copy(err)
 #pragma acc kernels
       {
@@ -138,10 +139,12 @@ int solve_heat_equation(FLOAT_TYPE * restrict init_grid, const size_t grid_size,
   return 0;
 }
 
-const char *get_solver_version() {
+const char *get_solver_version()
+{
   return "Version 4";
 }
 
-int get_iters_without_err() {
+int get_iters_without_err()
+{
   return N_ERR_COMPUTING_IN_DEVICE;
 }
